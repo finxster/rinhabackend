@@ -1,6 +1,5 @@
 package com.finxsoft.rinhabackend.service;
 
-import com.finxsoft.rinhabackend.domain.Client;
 import com.finxsoft.rinhabackend.domain.Transaction;
 import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.dto.CreateTransactionDTO;
