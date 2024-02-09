@@ -1,18 +1,13 @@
 package com.finxsoft.rinhabackend.service;
 
 import com.finxsoft.rinhabackend.domain.Client;
-import com.finxsoft.rinhabackend.dto.BalanceDTO;
-import com.finxsoft.rinhabackend.dto.StatementResponseDTO;
-import com.finxsoft.rinhabackend.dto.TransactionDTO;
+import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.exception.ClientNotFoundException;
+import com.finxsoft.rinhabackend.mapper.ClientMapper;
 import com.finxsoft.rinhabackend.repository.ClientRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.List;
 
 /**
  * @author finx
@@ -22,19 +17,26 @@ public class ClientService {
 
     private final ClientRepository clientRepository;
 
-    public ClientService(ClientRepository clientRepository) {
+    private final ClientMapper clientMapper;
+
+    public ClientService(ClientRepository clientRepository, ClientMapper clientMapper) {
         this.clientRepository = clientRepository;
+        this.clientMapper = clientMapper;
     }
 
     @Transactional
-    public Mono<Client> save(Client client) {
-        return clientRepository.save(client);
+    public Mono<ClientDTO> save(ClientDTO clientDTO) {
+        return Mono.just(clientMapper.toEntity(clientDTO))
+                .flatMap(clientRepository::save)
+                .map(clientMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
-    public Mono<Client> findById(Long clientId) {
+    public Mono<ClientDTO> findById(Long clientId) {
         return clientRepository
                 .findById(clientId)
+                .map(clientMapper::toDTO)
                 .switchIfEmpty(Mono.error(ClientNotFoundException::new));
     }
+
 }

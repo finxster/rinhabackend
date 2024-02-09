@@ -3,7 +3,6 @@ package com.finxsoft.rinhabackend.resource;
 import com.finxsoft.rinhabackend.dto.CreateTransactionDTO;
 import com.finxsoft.rinhabackend.dto.CreateTransactionResponseDTO;
 import com.finxsoft.rinhabackend.dto.StatementResponseDTO;
-import com.finxsoft.rinhabackend.service.ClientService;
 import com.finxsoft.rinhabackend.service.StatementService;
 import com.finxsoft.rinhabackend.service.TransactionService;
 import org.slf4j.Logger;
@@ -23,24 +22,22 @@ public class ClientResource {
 
     private final TransactionService transactionService;
 
-    private final ClientService clientService;
-
     private final StatementService statementService;
 
-    public ClientResource(TransactionService transactionService, ClientService clientService, StatementService statementService) {
+    public ClientResource(TransactionService transactionService, StatementService statementService) {
         this.transactionService = transactionService;
-        this.clientService = clientService;
         this.statementService = statementService;
     }
 
     @PostMapping("/{id}/transacoes")
     public Mono<ResponseEntity<CreateTransactionResponseDTO>> newTransaction(@PathVariable("id") Long id, @RequestBody CreateTransactionDTO createTransactionDTO) {
+        log.info("REST request to create a new transaction for client {}. Transaction details {}", id, createTransactionDTO);
         return transactionService.newTransaction(id, createTransactionDTO).map(ResponseEntity::ok);
     }
 
     @GetMapping("/{id}/extrato")
     public Mono<ResponseEntity<StatementResponseDTO>> transactions(@PathVariable("id") Long id) {
-        log.info("Call to retrieve balance and transactions for client with id {}", id);
+        log.info("REST request to retrieve balance and transactions for client {}", id);
         return statementService.getStatement(id).map(ResponseEntity::ok);
     }
 

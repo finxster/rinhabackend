@@ -1,16 +1,19 @@
 package com.finxsoft.rinhabackend.service;
 
-import com.finxsoft.rinhabackend.domain.Client;
+import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.exception.NegativeBalanceException;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * @author Luis Alves
+ * @author finx
  */
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -18,51 +21,32 @@ class TransactionServiceTest {
     @InjectMocks
     private TransactionService transactionService;
 
-    @Test
-    void validateNewBalance() {
-        Client client = new Client();
-        client.setBalance(1000);
+    private ClientDTO client;
+
+    @BeforeEach
+    void setup() {
+        client = new ClientDTO();
         client.setLimit(1000);
+    }
 
-        Client clientValidated = transactionService.validateNewBalance(client);
+    @ParameterizedTest
+    @ValueSource(ints = {1000, -1000, 0, 1001})
+    void validateNewBalance(int balance) {
+        client.setBalance(balance);
 
-        assertEquals(1000, clientValidated.getBalance());
+        ClientDTO clientValidated = transactionService.validateNewBalance(client);
+
+        assertEquals(balance, clientValidated.getBalance());
         assertEquals(1000, clientValidated.getLimit());
     }
 
-
-    @Test
-    void validateNewBalance_1() {
-        Client client = new Client();
-        client.setBalance(-1000);
-        client.setLimit(1000);
-
-        Client clientValidated = transactionService.validateNewBalance(client);
-
-        assertEquals(-1000, clientValidated.getBalance());
-        assertEquals(1000, clientValidated.getLimit());
-    }
-
-    @Test
-    void validateNewBalance_2() {
-        Client client = new Client();
-        client.setBalance(-2000);
-        client.setLimit(1000);
+    @ParameterizedTest
+    @ValueSource(ints = {-2000, -1001})
+    void validateNewBalance_negativeScenarios(int balance) {
+        client.setBalance(balance);
 
         assertThrows(NegativeBalanceException.class,
                 () -> transactionService.validateNewBalance(client));
-    }
-
-    @Test
-    void validateNewBalance_3() {
-        Client client = new Client();
-        client.setBalance(0);
-        client.setLimit(1000);
-
-        Client clientValidated = transactionService.validateNewBalance(client);
-
-        assertEquals(0, clientValidated.getBalance());
-        assertEquals(1000, clientValidated.getLimit());
     }
 
 }

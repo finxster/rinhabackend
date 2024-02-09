@@ -2,8 +2,10 @@ package com.finxsoft.rinhabackend.service;
 
 import com.finxsoft.rinhabackend.domain.Client;
 import com.finxsoft.rinhabackend.dto.BalanceDTO;
+import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.dto.StatementResponseDTO;
 import com.finxsoft.rinhabackend.dto.TransactionDTO;
+import com.finxsoft.rinhabackend.mapper.StatementMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,7 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 /**
  * @author finx
@@ -26,29 +27,30 @@ public class StatementService {
 
     private final TransactionService transactionService;
 
-    public StatementService(ClientService clientService, TransactionService transactionService) {
+    private final StatementMapper statementMapper;
+
+    public StatementService(ClientService clientService, TransactionService transactionService, StatementMapper statementMapper) {
         this.clientService = clientService;
         this.transactionService = transactionService;
+        this.statementMapper = statementMapper;
     }
 
     @Transactional(readOnly = true)
     public Mono<StatementResponseDTO> getStatement(Long id) {
-        return clientService.findById(id).map(this::createStatementResponseDTO);
+        return clientService.findById(id).flatMap(this::createStatementResponseDTO);
     }
 
-    private StatementResponseDTO createStatementResponseDTO(Client client) {
-        log.info("Creating a statement for the client with id {}", client.getId());
+    private Mono<StatementResponseDTO> createStatementResponseDTO(ClientDTO clientDTO) {
+        log.debug("Creating a statement for the client with id {}", clientDTO.getId());
         BalanceDTO balanceDTO = new BalanceDTO();
         balanceDTO.setDate(ZonedDateTime.now());
-        balanceDTO.setLimit(client.getLimit());
-        balanceDTO.setTotal(client.getBalance());
+        balanceDTO.setLimit(clientDTO.getLimit());
+        balanceDTO.setTotal(clientDTO.getBalance());
 
-        Flux<TransactionDTO> transactions = transactionService.findLastTransactions(client);
-
-        StatementResponseDTO statementResponseDTO = new StatementResponseDTO();
-        statementResponseDTO.setBalanceDTO(balanceDTO);
-        statementResponseDTO.setTransactions(transactions.collectList().block());
-        return statementResponseDTO;
+        return transactionService
+                .findLastTransactions(clientDTO)
+                .collectList()
+                .map(transactions -> statementMapper.toDTO(balanceDTO, transactions));
     }
 
 }

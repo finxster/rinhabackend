@@ -1,6 +1,11 @@
 package com.finxsoft.rinhabackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.core.style.ToStringCreator;
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author finx
@@ -10,7 +15,7 @@ public class CreateTransactionDTO {
     @JsonProperty("valor")
     private int value;
 
-    @JsonProperty("tipo")
+    @JsonProperty(value = "tipo", required = true)
     private String type;
 
     @JsonProperty("descricao")
@@ -38,6 +43,11 @@ public class CreateTransactionDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.NO_CLASS_NAME_STYLE);
     }
 
 }

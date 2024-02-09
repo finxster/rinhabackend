@@ -21,7 +21,7 @@ public class Transaction {
 
     private String type;
 
-    private Client client;
+    private Long clientId;
 
     private Instant dateTime;
 
@@ -57,12 +57,12 @@ public class Transaction {
         this.type = type;
     }
 
-    public Client getClient() {
-        return client;
+    public Long getClientId() {
+        return clientId;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
     }
 
     public Instant getDateTime() {

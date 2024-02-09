@@ -2,6 +2,7 @@ package com.finxsoft.rinhabackend.service;
 
 import com.finxsoft.rinhabackend.domain.Client;
 import com.finxsoft.rinhabackend.domain.Transaction;
+import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.dto.CreateTransactionDTO;
 import com.finxsoft.rinhabackend.dto.CreateTransactionResponseDTO;
 import com.finxsoft.rinhabackend.dto.TransactionDTO;
@@ -43,49 +44,53 @@ public class TransactionService {
     }
 
     @Transactional(readOnly = true)
-    public Flux<TransactionDTO> findLastTransactions(Client client) {
-        return transactionRepository.findFirst10ByClientIdOrderByDateTimeDesc(client.getId())
+    public Flux<TransactionDTO> findLastTransactions(ClientDTO clientDTO) {
+        return transactionRepository.findFirst10ByClientIdOrderByDateTimeDesc(clientDTO.getId())
                 .map(transactionMapper::toDto);
     }
 
-    private Mono<Client> createTransaction(Client client, CreateTransactionDTO createTransactionDTO) {
+    private Mono<ClientDTO> createTransaction(ClientDTO clientDTO, CreateTransactionDTO createTransactionDTO) {
         Transaction transaction = new Transaction();
         transaction.setValue(createTransactionDTO.getValue());
         transaction.setDescription(createTransactionDTO.getDescription());
         transaction.setType(createTransactionDTO.getType());
         transaction.setDateTime(Instant.now());
-        transaction.setClient(client);
+        transaction.setClientId(clientDTO.getId());
         return transactionRepository.save(transaction)
-                .flatMap(t -> saveClient(client));
+                .flatMap(t -> saveClient(clientDTO));
     }
 
-    private Mono<Client> saveClient(Client client) {
-        return clientService.save(client);
+    private Mono<ClientDTO> saveClient(ClientDTO clientDTO) {
+        return clientService.save(clientDTO);
     }
 
-    private CreateTransactionResponseDTO createReturn(Client client) {
+    private CreateTransactionResponseDTO createReturn(ClientDTO clientDTO) {
         CreateTransactionResponseDTO createTransactionResponseDTO = new CreateTransactionResponseDTO();
-        createTransactionResponseDTO.setBalance(client.getBalance());
-        createTransactionResponseDTO.setLimit(client.getLimit());
+        createTransactionResponseDTO.setBalance(clientDTO.getBalance());
+        createTransactionResponseDTO.setLimit(clientDTO.getLimit());
         return createTransactionResponseDTO;
     }
 
-    Client validateNewBalance(Client client) {
-        if (client.getLimit() < Math.abs(client.getBalance()) && Math.signum(client.getBalance()) == -1) {
+    ClientDTO validateNewBalance(ClientDTO clientDTO) {
+        if (clientDTO.getLimit() < Math.abs(clientDTO.getBalance()) && Math.signum(clientDTO.getBalance()) == -1) {
             throw new NegativeBalanceException();
         }
-        return client;
+        return clientDTO;
     }
 
-    private Client getNewBalance(Client client, CreateTransactionDTO createTransactionDTO) {
+    private ClientDTO getNewBalance(ClientDTO clientDTO, CreateTransactionDTO createTransactionDTO) {
+        int oldBalance = clientDTO.getBalance();
+        int transactionValue = createTransactionDTO.getValue();
+
         int newBalance;
         if (createTransactionDTO.getType().equalsIgnoreCase("d")) {
-            newBalance = client.getBalance() - createTransactionDTO.getValue();
+            newBalance = oldBalance - transactionValue;
         } else {
-            newBalance = client.getBalance() + createTransactionDTO.getValue();
+            newBalance = oldBalance + transactionValue;
         }
-        client.setBalance(newBalance);
-        return client;
+
+        clientDTO.setBalance(newBalance);
+        return clientDTO;
     }
 
 }
