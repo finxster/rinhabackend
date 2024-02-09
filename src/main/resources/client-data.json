@@ -1,0 +1,32 @@
+[
+  {
+    "_class": "com.finxsoft.rinhabackend.domain.Client",
+    "id": 1,
+    "balance": 100000,
+    "limit": 0
+  },
+  {
+    "_class": "com.finxsoft.rinhabackend.domain.Client",
+    "id": 2,
+    "balance": 80000,
+    "limit": 0
+  },
+  {
+    "_class": "com.finxsoft.rinhabackend.domain.Client",
+    "id": 3,
+    "balance": 1000000,
+    "limit": 0
+  },
+  {
+    "_class": "com.finxsoft.rinhabackend.domain.Client",
+    "id": 4,
+    "balance": 10000000,
+    "limit": 0
+  },
+  {
+    "_class": "com.finxsoft.rinhabackend.domain.Client",
+    "id": 5,
+    "balance": 500000,
+    "limit": 0
+  }
+]
