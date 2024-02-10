@@ -5,9 +5,11 @@ import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.dto.CreateTransactionDTO;
 import com.finxsoft.rinhabackend.dto.CreateTransactionResponseDTO;
 import com.finxsoft.rinhabackend.dto.TransactionDTO;
+import com.finxsoft.rinhabackend.exception.InvalidTransactionException;
 import com.finxsoft.rinhabackend.exception.NegativeBalanceException;
 import com.finxsoft.rinhabackend.mapper.TransactionMapper;
 import com.finxsoft.rinhabackend.repository.TransactionRepository;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -37,9 +39,20 @@ public class TransactionService {
     public Mono<CreateTransactionResponseDTO> newTransaction(Long clientId, CreateTransactionDTO createTransactionDTO) {
         return clientService.findById(clientId)
                 .map(client -> getNewBalance(client, createTransactionDTO))
+                .map(client -> validateNewTransaction(client, createTransactionDTO))
                 .map(this::validateNewBalance)
                 .flatMap(client -> createTransaction(client, createTransactionDTO))
                 .map(this::createReturn);
+    }
+
+    private ClientDTO validateNewTransaction(ClientDTO clientDTO, CreateTransactionDTO createTransactionDTO) {
+        if (StringUtils.isBlank(createTransactionDTO.getDescription())) {
+            throw new InvalidTransactionException();
+        }
+        if (createTransactionDTO.getDescription().length() > 10) {
+            throw new InvalidTransactionException();
+        }
+        return clientDTO;
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +63,7 @@ public class TransactionService {
 
     private Mono<ClientDTO> createTransaction(ClientDTO clientDTO, CreateTransactionDTO createTransactionDTO) {
         Transaction transaction = new Transaction();
-        transaction.setValue(createTransactionDTO.getValue());
+        transaction.setValue(createTransactionDTO.getValue().intValue());
         transaction.setDescription(createTransactionDTO.getDescription());
         transaction.setType(createTransactionDTO.getType());
         transaction.setDateTime(Instant.now());
@@ -79,13 +92,15 @@ public class TransactionService {
 
     private ClientDTO getNewBalance(ClientDTO clientDTO, CreateTransactionDTO createTransactionDTO) {
         int oldBalance = clientDTO.getBalance();
-        int transactionValue = createTransactionDTO.getValue();
+        int transactionValue = createTransactionDTO.getValue().intValue();
 
         int newBalance;
         if (createTransactionDTO.getType().equalsIgnoreCase("d")) {
             newBalance = oldBalance - transactionValue;
-        } else {
+        } else if (createTransactionDTO.getType().equalsIgnoreCase("c")) {
             newBalance = oldBalance + transactionValue;
+        } else {
+            throw new InvalidTransactionException();
         }
 
         clientDTO.setBalance(newBalance);

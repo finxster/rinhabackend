@@ -5,6 +5,7 @@ import com.finxsoft.rinhabackend.dto.CreateTransactionResponseDTO;
 import com.finxsoft.rinhabackend.dto.StatementResponseDTO;
 import com.finxsoft.rinhabackend.service.StatementService;
 import com.finxsoft.rinhabackend.service.TransactionService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,8 @@ public class ClientResource {
     }
 
     @PostMapping("/{id}/transacoes")
-    public Mono<ResponseEntity<CreateTransactionResponseDTO>> newTransaction(@PathVariable("id") Long id, @RequestBody CreateTransactionDTO createTransactionDTO) {
+    public Mono<ResponseEntity<CreateTransactionResponseDTO>> newTransaction(@PathVariable("id") Long id,
+                                                                             @RequestBody @Valid CreateTransactionDTO createTransactionDTO) {
         log.info("REST request to create a new transaction for client {}. Transaction details {}", id, createTransactionDTO);
         return transactionService.newTransaction(id, createTransactionDTO).map(ResponseEntity::ok);
     }

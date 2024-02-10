@@ -1,31 +1,37 @@
 package com.finxsoft.rinhabackend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.springframework.core.style.ToStringCreator;
-import org.springframework.data.mongodb.core.aggregation.ConvertOperators;
-import org.springframework.util.ReflectionUtils;
+
+import java.math.BigDecimal;
 
 /**
  * @author finx
  */
 public class CreateTransactionDTO {
 
+    @Positive
+    @Digits(fraction = 0, integer = 10)
     @JsonProperty("valor")
-    private int value;
+    private BigDecimal value;
 
-    @JsonProperty(value = "tipo", required = true)
+    @NotBlank
+    @JsonProperty(value = "tipo")
     private String type;
 
+    @NotBlank
     @JsonProperty("descricao")
     private String description;
 
-    public int getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
