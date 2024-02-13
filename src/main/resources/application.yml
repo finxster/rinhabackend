@@ -1,2 +1,15 @@
 mongodb:
   uri: mongodb://localhost:27017/rinha
+
+server:
+  port: 9999
+
+logging:
+  level:
+    ROOT: INFO
+    com:
+      finxsoft: INFO
+    io:
+      r2dbc:
+        h2:
+          H2Connection: ERROR

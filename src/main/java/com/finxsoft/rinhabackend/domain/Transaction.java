@@ -1,20 +1,23 @@
 package com.finxsoft.rinhabackend.domain;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
-import java.time.ZonedDateTime;
 
 /**
  * @author finx
  */
-@Document
+@Table("client_transaction")
 public class Transaction {
 
     @Id
     private String id;
 
+    @Column("transaction_value")
     private Integer value;
 
     private String description;
@@ -71,5 +74,10 @@ public class Transaction {
 
     public void setDateTime(Instant dateTime) {
         this.dateTime = dateTime;
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.NO_CLASS_NAME_STYLE);
     }
 }

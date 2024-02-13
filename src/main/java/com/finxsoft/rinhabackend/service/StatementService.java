@@ -1,16 +1,13 @@
 package com.finxsoft.rinhabackend.service;
 
-import com.finxsoft.rinhabackend.domain.Client;
 import com.finxsoft.rinhabackend.dto.BalanceDTO;
 import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.dto.StatementResponseDTO;
-import com.finxsoft.rinhabackend.dto.TransactionDTO;
 import com.finxsoft.rinhabackend.mapper.StatementMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;

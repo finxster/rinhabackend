@@ -1,12 +1,13 @@
 package com.finxsoft.rinhabackend.domain;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 /**
  * @author finx
  */
-@Document
+@Table("client")
 public class Client {
 
     @Id
@@ -14,6 +15,7 @@ public class Client {
 
     private int balance;
 
+    @Column("balance_limit")
     private int limit;
 
     public Client() {

@@ -1,11 +1,11 @@
 package com.finxsoft.rinhabackend.service;
 
-import com.finxsoft.rinhabackend.domain.Client;
 import com.finxsoft.rinhabackend.dto.ClientDTO;
 import com.finxsoft.rinhabackend.exception.ClientNotFoundException;
 import com.finxsoft.rinhabackend.mapper.ClientMapper;
 import com.finxsoft.rinhabackend.repository.ClientRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 

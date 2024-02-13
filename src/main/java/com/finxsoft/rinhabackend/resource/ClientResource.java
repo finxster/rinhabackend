@@ -33,13 +33,13 @@ public class ClientResource {
     @PostMapping("/{id}/transacoes")
     public Mono<ResponseEntity<CreateTransactionResponseDTO>> newTransaction(@PathVariable("id") Long id,
                                                                              @RequestBody @Valid CreateTransactionDTO createTransactionDTO) {
-        log.info("REST request to create a new transaction for client {}. Transaction details {}", id, createTransactionDTO);
+        log.debug("REST request to create a new transaction for client {}. Transaction details {}", id, createTransactionDTO);
         return transactionService.newTransaction(id, createTransactionDTO).map(ResponseEntity::ok);
     }
 
     @GetMapping("/{id}/extrato")
     public Mono<ResponseEntity<StatementResponseDTO>> transactions(@PathVariable("id") Long id) {
-        log.info("REST request to retrieve balance and transactions for client {}", id);
+        log.debug("REST request to retrieve balance and transactions for client {}", id);
         return statementService.getStatement(id).map(ResponseEntity::ok);
     }
 

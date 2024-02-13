@@ -9,7 +9,8 @@ import com.finxsoft.rinhabackend.exception.InvalidTransactionException;
 import com.finxsoft.rinhabackend.exception.NegativeBalanceException;
 import com.finxsoft.rinhabackend.mapper.TransactionMapper;
 import com.finxsoft.rinhabackend.repository.TransactionRepository;
-import io.micrometer.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -22,6 +23,8 @@ import java.time.Instant;
  */
 @Service
 public class TransactionService {
+
+    private static final Logger log = LoggerFactory.getLogger(TransactionService.class);
 
     private final TransactionRepository transactionRepository;
 
@@ -39,20 +42,9 @@ public class TransactionService {
     public Mono<CreateTransactionResponseDTO> newTransaction(Long clientId, CreateTransactionDTO createTransactionDTO) {
         return clientService.findById(clientId)
                 .map(client -> getNewBalance(client, createTransactionDTO))
-                .map(client -> validateNewTransaction(client, createTransactionDTO))
                 .map(this::validateNewBalance)
                 .flatMap(client -> createTransaction(client, createTransactionDTO))
                 .map(this::createReturn);
-    }
-
-    private ClientDTO validateNewTransaction(ClientDTO clientDTO, CreateTransactionDTO createTransactionDTO) {
-        if (StringUtils.isBlank(createTransactionDTO.getDescription())) {
-            throw new InvalidTransactionException();
-        }
-        if (createTransactionDTO.getDescription().length() > 10) {
-            throw new InvalidTransactionException();
-        }
-        return clientDTO;
     }
 
     @Transactional(readOnly = true)
@@ -69,14 +61,12 @@ public class TransactionService {
         transaction.setDateTime(Instant.now());
         transaction.setClientId(clientDTO.getId());
         return transactionRepository.save(transaction)
-                .flatMap(t -> saveClient(clientDTO));
-    }
-
-    private Mono<ClientDTO> saveClient(ClientDTO clientDTO) {
-        return clientService.save(clientDTO);
+                .doOnNext(transaction1 -> log.debug("Transaction {} saved.", transaction1))
+                .flatMap(t -> clientService.save(clientDTO));
     }
 
     private CreateTransactionResponseDTO createReturn(ClientDTO clientDTO) {
+        log.debug("Transaction created and client currently has balance {} for a limit {}.", clientDTO.getBalance(), clientDTO.getLimit());
         CreateTransactionResponseDTO createTransactionResponseDTO = new CreateTransactionResponseDTO();
         createTransactionResponseDTO.setBalance(clientDTO.getBalance());
         createTransactionResponseDTO.setLimit(clientDTO.getLimit());
