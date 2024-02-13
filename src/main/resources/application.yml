@@ -1,8 +1,11 @@
-mongodb:
-  uri: mongodb://localhost:27017/rinha
-
 server:
   port: 9999
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: mysecretpassword
 
 logging:
   level:
